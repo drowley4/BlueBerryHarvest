@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">BlueBerryHarvest</string>
+    <string name="add_picker">Add Picker</string>
+    <string name="add_bucket">Add Bucket</string>
+    <string name="full_name">Full Name</string>
+    <string name="weight">Weight</string>
+    <string name="full_name_id">Name/ID</string>
+</resources>

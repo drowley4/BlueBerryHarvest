@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:layout_height="50dp"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/add_picker_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/add_picker" />
+
+    <TextView
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/id_textview" />
+
+    <EditText
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/name_editview"
+        android:hint="@string/full_name"/>
+
+</LinearLayout>
