@@ -3,12 +3,13 @@ package com.example.blueberryharvest.presenter;
 import com.example.blueberryharvest.data.Model;
 import com.example.blueberryharvest.data.Picker;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class MainPresenter {
     private Model model;
 
-    public MainPresenter() {
+    public MainPresenter() throws SQLException {
         model = Model.getInstance();
     }
 

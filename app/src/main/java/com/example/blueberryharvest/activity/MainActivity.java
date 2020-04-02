@@ -3,6 +3,7 @@ package com.example.blueberryharvest.activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
@@ -21,6 +23,10 @@ import com.example.blueberryharvest.data.Picker;
 import com.example.blueberryharvest.presenter.MainPresenter;
 import com.example.blueberryharvest.uihelp.PickerAdapter;
 
+import org.w3c.dom.Text;
+
+import java.sql.BatchUpdateException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,18 +39,22 @@ public class MainActivity extends AppCompatActivity {
     private PickerAdapter pickerAdapter;
     private String date;
     private TextView totalPoundsView;
+    private TextView dateTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("main activity", "onCreate() called");
-        this.presenter = new MainPresenter();
-
+        try {
+            this.presenter = new MainPresenter();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         this.myDialog = new Dialog(this);
         Button addPickerButton = (Button) findViewById(R.id.add_picker_button);
         Button addBucketButton = (Button) findViewById(R.id.add_bucket_button);
-        TextView dateTextView = (TextView) findViewById(R.id.date_textview);
+        dateTextView = (TextView) findViewById(R.id.date_textview);
         this.totalPoundsView = (TextView) findViewById(R.id.total_day_pounds);
 
         this.date = "";
@@ -102,9 +112,42 @@ public class MainActivity extends AppCompatActivity {
         dateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "changing date feature is not yet ready", Toast.LENGTH_SHORT).show();
+                changeDate();
             }
         });
+    }
+
+    private void changeDate() {
+        this.myDialog.setContentView(R.layout.change_date);
+        Button changeDateButton = (Button) this.myDialog.findViewById(R.id.change_date_button);
+        final TextView dTextView = (TextView) this.myDialog.findViewById(R.id.date_textview);
+        CalendarView calendarView = (CalendarView) this.myDialog.findViewById(R.id.calender_view);
+
+        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                String m = month+1 + "";
+                String d = dayOfMonth + "";
+                if(d.length() == 1) {
+                    d = "0" + d;
+                }
+                if(m.length() == 1) {
+                    m = "0" + m;
+                }
+                date = m + "/" + d + "/" + year;
+                dTextView.setText(date);
+            }
+        });
+
+        changeDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateTextView.setText(date);
+                updatePickers();
+                myDialog.dismiss();
+            }
+        });
+        myDialog.show();
     }
 
     private void addBucket() {

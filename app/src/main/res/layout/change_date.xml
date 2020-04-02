@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="500dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/date_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="@string/select_date" />
+
+    <CalendarView
+        android:layout_width="wrap_content"
+        android:layout_height="320dp"
+        android:id="@+id/calender_view">
+    </CalendarView>
+
+    <Button
+        android:id="@+id/change_date_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="false"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="@string/change_date"
+        android:textSize="16sp" />
+
+</LinearLayout>

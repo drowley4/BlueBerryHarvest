@@ -3,19 +3,36 @@ package com.example.blueberryharvest.data;
 import android.os.Build;
 import android.util.Log;
 
+import java.sql.SQLDataException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.blueberryharvest.dao.PickerAccess;
+import com.example.blueberryharvest.dao.BucketAccess;
+import com.example.blueberryharvest.dao.RecordAccess;
+
 public class Model {
     private static Model instance = null;
     private List<Picker> pickers;
     private int nextID;
+    private BucketAccess bucketAccess;
+    private PickerAccess pickerAccess;
+    private RecordAccess recordAccess;
 
-    private Model() {
+    private Model() throws SQLException {
         pickers = new ArrayList<Picker>();
+        bucketAccess = new BucketAccess();
+        pickerAccess = new PickerAccess();
+        recordAccess = new RecordAccess();
+
+        bucketAccess.create();
+        pickerAccess.create();
+        recordAccess.create();
+
         String date = "";
 
         if(Build.VERSION.SDK_INT > 25) {
@@ -42,10 +59,10 @@ public class Model {
             LocalTime now = LocalTime.now();
             time = dtf.format(now);
         }
-        Bucket bucket1 = new Bucket(6.5, time, "12/12/2012");
-        Bucket bucket2 = new Bucket(7.0, time, "12/12/2012");
-        Bucket bucket3 = new Bucket(4.5, time, "12/12/2012");
-        Bucket bucket4 = new Bucket(6.25, time, "12/12/2012");
+        Bucket bucket1 = new Bucket(6.5, time, "12/12/2012", 1);
+        Bucket bucket2 = new Bucket(7.0, time, "12/12/2012", 1);
+        Bucket bucket3 = new Bucket(4.5, time, "12/12/2012", 1);
+        Bucket bucket4 = new Bucket(6.25, time, "12/12/2012", 1);
         picker1.addBucket(bucket1, date);
         picker1.addBucket(bucket2, date);
         picker1.addBucket(bucket3, date);
@@ -67,7 +84,7 @@ public class Model {
         this.nextID = 13;
     }
 
-    public static Model getInstance() {
+    public static Model getInstance() throws SQLException {
         if (instance == null) {
             instance = new Model();
             return instance;
@@ -107,8 +124,9 @@ public class Model {
             time = dtf.format(now);
         }
         Picker picker = this.findPicker(id);
-        Bucket bucket = new Bucket(weight, time, date);
+        Bucket bucket = new Bucket(weight, time, date, id);
         picker.addBucket(bucket, date);
+
     }
 
     public void addPicker(String name) {

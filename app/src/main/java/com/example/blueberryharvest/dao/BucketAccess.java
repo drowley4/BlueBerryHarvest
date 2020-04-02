@@ -14,27 +14,12 @@ public class BucketAccess {
     }
 
     public void create() throws SQLException {
-        Database db = new Database();
-        Connection connection = db.getConnection();
-
-        String create = "create table if not exists bucket (date text not null primary key, " +
-                "time text not null, weight double not null)";
-        PreparedStatement stmt = connection.prepareStatement(create);
-        stmt.executeUpdate();
-        stmt.close();
-        db.closeConnection();
-    }
-
-    public void insert(Bucket bucket) throws SQLException {
         try {
             Database db = new Database();
             Connection connection = db.getConnection();
-
-            String insert = "insert into bucket values (?, ?, ?) ";
-            PreparedStatement stmt = connection.prepareStatement(insert);
-            stmt.setString(1, bucket.getDate());
-            stmt.setString(2, bucket.getTime());
-            stmt.setDouble(3, bucket.getWeight());
+            String create = "create table if not exists Buckets (time text not null primary key, " +
+                    "pickerID int not null, date text not null, weight double not null)";
+            PreparedStatement stmt = connection.prepareStatement(create);
             stmt.executeUpdate();
             stmt.close();
             db.closeConnection();
@@ -44,13 +29,34 @@ public class BucketAccess {
         }
     }
 
-    public Bucket[] findAllBuckets(String date) throws SQLException {
+    public void insert(Bucket bucket) throws SQLException {
+        try {
+            Database db = new Database();
+            Connection connection = db.getConnection();
+
+            String insert = "insert into Buckets values (?, ?, ?, ?) ";
+            PreparedStatement stmt = connection.prepareStatement(insert);
+            stmt.setString(1, bucket.getTime());
+            stmt.setInt(2, bucket.getPickerID());
+            stmt.setString(3, bucket.getDate());
+            stmt.setDouble(4, bucket.getWeight());
+            stmt.executeUpdate();
+            stmt.close();
+            db.closeConnection();
+        }
+        catch(SQLException sx) {
+            Log.d("bucket access activity", sx.toString());
+        }
+    }
+
+    public Bucket[] findAllBuckets(String date, int pickerID) throws SQLException {
         Database db = new Database();
         Connection connection = db.getConnection();
 
-        String query = "select * from event where date = ?";
+        String query = "select * from event where (date = ? AND pickerID = ?)";
         PreparedStatement stmt = connection.prepareStatement(query);
         stmt.setString(1, date);
+        stmt.setInt(2, pickerID);
         ResultSet results = stmt.executeQuery();
         int size = 0;
         while(results.next()) {
@@ -60,8 +66,8 @@ public class BucketAccess {
         Bucket[] buckets = new Bucket[size];
         int i = 0;
         while(results.next()) {
-            buckets[i] = new Bucket(results.getDouble(3), results.getString(2),
-                    results.getString(1));
+            buckets[i] = new Bucket(results.getDouble(4), results.getString(1),
+                    results.getString(3), results.getInt(2));
             i += 1;
         }
         results.close();

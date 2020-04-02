@@ -5,12 +5,14 @@ public class Bucket {
     private double weight;
     private String time;
     private String date;
+    private int pickerID;
 
 
-    public Bucket(double weight, String time, String date) {
+    public Bucket(double weight, String time, String date, int pickerID) {
         this.weight = weight;
         this.time = time;
         this.date = date;
+        this.pickerID = pickerID;
     }
 
     public double getWeight() {
@@ -35,5 +37,9 @@ public class Bucket {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getPickerID() {
+        return pickerID;
     }
 }

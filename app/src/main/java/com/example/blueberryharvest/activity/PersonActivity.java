@@ -15,6 +15,7 @@ import com.example.blueberryharvest.data.Bucket;
 import com.example.blueberryharvest.presenter.PersonPresenter;
 import com.example.blueberryharvest.uihelp.BucketAdapter;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class PersonActivity extends AppCompatActivity {
@@ -25,7 +26,12 @@ public class PersonActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person);
         Log.d("person activity", "onCreate() called");
-        presenter = new PersonPresenter();
+
+        try {
+            presenter = new PersonPresenter();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         TextView idView = (TextView) findViewById(R.id.id_textview);
         TextView nameView = (TextView) findViewById(R.id.name_textview);
