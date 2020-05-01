@@ -3,6 +3,7 @@ package com.example.blueberryharvest.uihelp;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import org.w3c.dom.Text;
 import java.util.List;
 
 public class PickerAdapter extends ArrayAdapter<Picker> {
-    private String date;
+    public String date;
 
     public PickerAdapter(Context context, List<Picker> pickers, String date) {
         super(context, 0, pickers);

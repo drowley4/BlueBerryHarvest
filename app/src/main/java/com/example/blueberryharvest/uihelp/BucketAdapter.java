@@ -17,6 +17,7 @@ import org.w3c.dom.Text;
 import java.util.List;
 
 public class BucketAdapter extends ArrayAdapter<Bucket> {
+
     public BucketAdapter(Context context, List<Bucket> buckets) {
         super(context, 0, buckets);
     }

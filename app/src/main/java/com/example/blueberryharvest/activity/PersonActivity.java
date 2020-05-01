@@ -1,11 +1,17 @@
 package com.example.blueberryharvest.activity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +26,12 @@ import java.util.List;
 
 public class PersonActivity extends AppCompatActivity {
     private PersonPresenter presenter;
+    private Dialog myDialog;
+    private List<Bucket> buckets;
+    private int pickerID;
+    private String harvestDate;
+    private BucketAdapter bucketAdapter;
+    private TextView dateTextView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,37 +40,119 @@ public class PersonActivity extends AppCompatActivity {
         Log.d("person activity", "onCreate() called");
 
         try {
-            presenter = new PersonPresenter();
+            presenter = new PersonPresenter(this);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        this.myDialog = new Dialog(this);
         TextView idView = (TextView) findViewById(R.id.id_textview);
         TextView nameView = (TextView) findViewById(R.id.name_textview);
-        TextView dateView = (TextView) findViewById(R.id.date_textview);
+        this.dateTextView = (TextView) findViewById(R.id.date_textview);
 
         Intent intentExtras = getIntent();
-        int pickerID = intentExtras.getIntExtra("id", 0);
-        String harvestDate = intentExtras.getStringExtra("date");
+        this.pickerID = intentExtras.getIntExtra("id", 0);
+        this.harvestDate = intentExtras.getStringExtra("date");
         String pickerName = intentExtras.getStringExtra("name");
 
-        List<Bucket> buckets = presenter.getBuckets(pickerID, harvestDate);
-        BucketAdapter bucketAdapter = new BucketAdapter(getApplicationContext(), buckets);
+        this.buckets = this.presenter.getBuckets(this.pickerID, this.harvestDate);
+        this.bucketAdapter = new BucketAdapter(getApplicationContext(), this.buckets);
         final ListView bucketListView = (ListView) findViewById(R.id.bucket_list);
         bucketListView.setAdapter(bucketAdapter);
 
-        String id = "ID: " + pickerID + "";
+        String id = "ID: " + this.pickerID + "";
         idView.setText(id);
         String name = "Name: " + pickerName;
         nameView.setText(name);
-        dateView.setText(harvestDate);
+        this.dateTextView.setText(this.harvestDate);
 
-        dateView.setOnClickListener(new View.OnClickListener() {
+        this.dateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "changing date feature is not yet ready", Toast.LENGTH_SHORT).show();
+                changeDate();
             }
         });
 
+        bucketListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView timeTextView = view.findViewById(R.id.time_textview);
+                TextView weightTextView = view.findViewById(R.id.pounds_textview);
+                deleteBucket(timeTextView.getText().toString(), weightTextView.getText().toString());
+            }
+        });
+
+    }
+
+    private void changeDate() {
+        this.myDialog.setContentView(R.layout.change_date);
+        Button changeDateButton = (Button) this.myDialog.findViewById(R.id.change_date_button);
+        final TextView dTextView = (TextView) this.myDialog.findViewById(R.id.date_textview);
+        CalendarView calendarView = (CalendarView) this.myDialog.findViewById(R.id.calender_view);
+
+        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                String m = month+1 + "";
+                String d = dayOfMonth + "";
+                if(d.length() == 1) {
+                    d = "0" + d;
+                }
+                if(m.length() == 1) {
+                    m = "0" + m;
+                }
+                harvestDate = m + "/" + d + "/" + year;
+                dTextView.setText(harvestDate);
+            }
+        });
+
+        changeDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateTextView.setText(harvestDate);
+                updateBuckets();
+                myDialog.dismiss();
+            }
+        });
+        myDialog.show();
+    }
+
+    private void deleteBucket(String time, String weight) {
+        this.myDialog.setContentView(R.layout.delete_dialog_box);
+        TextView timeTextView = this.myDialog.findViewById(R.id.first_textview);
+        TextView weightTextView = this.myDialog.findViewById(R.id.second_textview);
+        Button yesButton = this.myDialog.findViewById(R.id.yes_button);
+        Button noButton = this.myDialog.findViewById(R.id.no_button);
+        timeTextView.setText(time);
+        weightTextView.setText(weight);
+        final String tmpTime = time;
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(presenter.deleteBucket(pickerID, tmpTime)) {
+                    Toast.makeText(myDialog.getContext(), "Bucket Deleted", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(myDialog.getContext(), "Bucket Not Deleted", Toast.LENGTH_SHORT).show();
+                }
+                myDialog.dismiss();
+                updateBuckets();
+            }
+        });
+
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        this.myDialog.show();
+
+    }
+
+    private void updateBuckets() {
+        this.buckets.clear();
+        this.buckets.addAll(presenter.getBuckets(this.pickerID, this.harvestDate));
+        this.bucketAdapter.notifyDataSetChanged();
     }
 }

@@ -7,9 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
@@ -23,13 +24,11 @@ import com.example.blueberryharvest.data.Picker;
 import com.example.blueberryharvest.presenter.MainPresenter;
 import com.example.blueberryharvest.uihelp.PickerAdapter;
 
-import org.w3c.dom.Text;
 
-import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,13 +46,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Log.d("main activity", "onCreate() called");
         try {
-            this.presenter = new MainPresenter();
+            this.presenter = new MainPresenter(this);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         this.myDialog = new Dialog(this);
         Button addPickerButton = (Button) findViewById(R.id.add_picker_button);
         Button addBucketButton = (Button) findViewById(R.id.add_bucket_button);
+        Button deletePickerButton = (Button) findViewById(R.id.delete_picker_button);
         dateTextView = (TextView) findViewById(R.id.date_textview);
         this.totalPoundsView = (TextView) findViewById(R.id.total_day_pounds);
 
@@ -74,11 +74,12 @@ public class MainActivity extends AppCompatActivity {
         pickerListView.setAdapter(pickerAdapter);
 
 
-        final String finalDate = date;
+
         pickerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final String finalDate = date;
                 TextView idView = view.findViewById(R.id.id_textview);
                 String  pickerID = idView.getText().toString();
                 pickerID = pickerID.substring(4);
@@ -106,6 +107,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 addBucket();
+            }
+        });
+
+        deletePickerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deletePicker();
             }
         });
 
@@ -153,8 +161,12 @@ public class MainActivity extends AppCompatActivity {
     private void addBucket() {
         this.myDialog.setContentView(R.layout.add_bucket);
         Button addBucketButton = (Button) this.myDialog.findViewById(R.id.add_bucket_button);
-        final EditText nameidEditView = (EditText) this.myDialog.findViewById(R.id.name_editview);
-
+        final AutoCompleteTextView nameidEditView = (AutoCompleteTextView) this.myDialog.findViewById(R.id.name_editview);
+        ArrayList<String> pickerNamesID = presenter.getAllPickers();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,pickerNamesID);
+        nameidEditView.setDropDownHeight(180);
+        nameidEditView.setThreshold(1);
+        nameidEditView.setAdapter(adapter);
         final String[] numbers = new String[32];
         double num = 0.25;
         for(int i = 0; i < numbers.length; i++) {
@@ -170,18 +182,21 @@ public class MainActivity extends AppCompatActivity {
         addBucketButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String nameid = nameidEditView.getText().toString();
+                String nameID = nameidEditView.getText().toString();
                 int weightIndex = weightPicker.getValue();
-                presenter.addBucket(Integer.valueOf(nameid), date, Double.valueOf(numbers[weightIndex]));
-                myDialog.dismiss();
-                updatePickers();
-                Toast.makeText(getApplicationContext(), "Bucket Added", Toast.LENGTH_SHORT).show();
+                if(presenter.addBucket(nameID, date, Float.parseFloat(numbers[weightIndex]))) {
+                    myDialog.dismiss();
+                    updatePickers();
+                    Toast.makeText(getApplicationContext(), "Bucket Added", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Please Select a Valid Picker", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         this.myDialog.show();
     }
-
 
     private void addPicker() {
         this.myDialog.setContentView(R.layout.add_picker);
@@ -205,10 +220,63 @@ public class MainActivity extends AppCompatActivity {
         this.myDialog.show();
     }
 
+    private void deletePicker() {
+        this.myDialog.setContentView(R.layout.delete_picker);
+        Button deletebutton = (Button) this.myDialog.findViewById(R.id.delete_button);
+        final AutoCompleteTextView nameidEditView = (AutoCompleteTextView) this.myDialog.findViewById(R.id.name_editview);
+        ArrayList<String> pickerNamesID = presenter.getAllPickers();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,pickerNamesID);
+        nameidEditView.setDropDownHeight(180);
+        nameidEditView.setThreshold(1);
+        nameidEditView.setAdapter(adapter);
+
+        deletebutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String nameID = nameidEditView.getText().toString();
+                myDialog.dismiss();
+                helpDelete(nameID);
+            }
+        });
+        this.myDialog.show();
+    }
+
+    private void helpDelete(final String nameid) {
+        this.myDialog.setContentView(R.layout.delete_dialog_box);
+        TextView nameTextView = this.myDialog.findViewById(R.id.first_textview);
+        Button yesButton = this.myDialog.findViewById(R.id.yes_button);
+        Button noButton = this.myDialog.findViewById(R.id.no_button);
+        nameTextView.setText(nameid);
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(presenter.deletePicker(nameid)) {
+                    Toast.makeText(myDialog.getContext(), "Picker Deleted", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(myDialog.getContext(), "Picker Not Deleted", Toast.LENGTH_SHORT).show();
+                }
+                myDialog.dismiss();
+                updatePickers();
+            }
+        });
+
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        this.myDialog.show();
+    }
+
     public void updatePickers() {
         String totalPounds = "Total Pounds Today: " + this.presenter.getTotalDayPounds(this.date);
         this.totalPoundsView.setText(totalPounds);
-        this.pickers = this.presenter.getPickers(this.date);
+        this.pickers.clear();
+        this.pickers.addAll(this.presenter.getPickers(this.date));
+        this.pickerAdapter.date = this.date;
         this.pickerAdapter.notifyDataSetChanged();
     }
 

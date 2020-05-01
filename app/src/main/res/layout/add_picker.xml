@@ -1,25 +1,28 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="400dp"
-    android:layout_height="50dp"
-    android:orientation="horizontal">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
+    <EditText
+        android:textSize="20sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/name_editview"
+        android:hint="@string/full_name"/>
     <Button
         android:id="@+id/add_picker_button"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="@string/add_picker" />
+        android:layout_height="wrap_content"
+        android:text="@string/add_picker"
+        android:layout_below="@+id/name_editview"/>
 
     <TextView
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/id_textview" />
+        android:layout_height="wrap_content"
+        android:id="@+id/id_textview"
+        android:layout_below="@+id/name_editview"
+        android:layout_toEndOf="@+id/add_picker_button"
+        android:layout_toRightOf="@+id/add_picker_button" />
 
-    <EditText
-        android:textSize="16sp"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/name_editview"
-        android:hint="@string/full_name"/>
 
-</LinearLayout>
+</RelativeLayout>

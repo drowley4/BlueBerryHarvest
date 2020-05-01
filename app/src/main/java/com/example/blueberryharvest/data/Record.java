@@ -12,14 +12,20 @@ public class Record {
 
     private List<Bucket> buckets;
 
-    public Record(String date) {
+    public Record(String date, List<Bucket> buckets) {
         this.date = date;
-        this.totalPounds = 0;
-        this.buckets = new ArrayList<Bucket>();
+        this.buckets = buckets;
+        this.sum();
     }
 
     public double getTotalPounds() {
         return totalPounds;
+    }
+    private void sum() {
+        this.totalPounds = 0;
+        for(Bucket b: this.buckets) {
+            this.totalPounds += b.getWeight();
+        }
     }
 
     public String getDate() {

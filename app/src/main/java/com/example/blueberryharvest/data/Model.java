@@ -1,5 +1,6 @@
 package com.example.blueberryharvest.data;
 
+import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
@@ -18,20 +19,17 @@ import com.example.blueberryharvest.dao.RecordAccess;
 public class Model {
     private static Model instance = null;
     private List<Picker> pickers;
-    private int nextID;
     private BucketAccess bucketAccess;
     private PickerAccess pickerAccess;
     private RecordAccess recordAccess;
 
-    private Model() throws SQLException {
+    private Model(Context c) throws SQLException {
         pickers = new ArrayList<Picker>();
-        bucketAccess = new BucketAccess();
-        pickerAccess = new PickerAccess();
-        recordAccess = new RecordAccess();
+        bucketAccess = new BucketAccess(c);
+        pickerAccess = new PickerAccess(c);
+        recordAccess = new RecordAccess(c);
 
-        bucketAccess.create();
-        pickerAccess.create();
-        recordAccess.create();
+
 
         String date = "";
 
@@ -40,18 +38,7 @@ public class Model {
             LocalDate now = LocalDate.now();
             date = dtf.format(now);
         }
-        Picker picker1 = new Picker("Crystal Rowley", 1, date);
-        Picker picker2 = new Picker("Rachel Rowley", 2, date);
-        Picker picker3 = new Picker("Stewart Rowley", 3, date);
-        Picker picker4 = new Picker("Emily Rowley", 4, date);
-        Picker picker5 = new Picker("Douglas Rowley", 5, date);
-        Picker picker6 = new Picker("Mckenzie Rowley", 6, date);
-        Picker picker7 = new Picker("Blake Rowley", 7, date);
-        Picker picker8 = new Picker("Jaq Rowley", 8, date);
-        Picker picker9 = new Picker("Tom Rowley", 9, date);
-        Picker picker10 = new Picker("Shanie Rowley", 10, date);
-        Picker picker11 = new Picker("Kyle Rowley", 11, date);
-        Picker picker12 = new Picker("John Rowley", 12, date);
+
 
         String time = "";
         if(Build.VERSION.SDK_INT > 25) {
@@ -59,43 +46,21 @@ public class Model {
             LocalTime now = LocalTime.now();
             time = dtf.format(now);
         }
-        Bucket bucket1 = new Bucket(6.5, time, "12/12/2012", 1);
-        Bucket bucket2 = new Bucket(7.0, time, "12/12/2012", 1);
-        Bucket bucket3 = new Bucket(4.5, time, "12/12/2012", 1);
-        Bucket bucket4 = new Bucket(6.25, time, "12/12/2012", 1);
-        picker1.addBucket(bucket1, date);
-        picker1.addBucket(bucket2, date);
-        picker1.addBucket(bucket3, date);
-        picker1.addBucket(bucket4, date);
-
-        pickers.add(picker1);
-        pickers.add(picker2);
-        pickers.add(picker3);
-        pickers.add(picker4);
-        pickers.add(picker5);
-        pickers.add(picker6);
-        pickers.add(picker7);
-        pickers.add(picker8);
-        pickers.add(picker9);
-        pickers.add(picker10);
-        pickers.add(picker11);
-        pickers.add(picker12);
-
-        this.nextID = 13;
     }
 
-    public static Model getInstance() throws SQLException {
+    public static Model getInstance(Context c) throws SQLException {
         if (instance == null) {
-            instance = new Model();
+            instance = new Model(c);
             return instance;
         }
         return instance;
     }
 
     public Picker findPicker(int id) {
-        for(int i = 0; i < this.pickers.size(); i++) {
-            if(this.pickers.get(i).getNumID() == id) {
-                return this.pickers.get(i);
+        ArrayList<Picker> allPickers = pickerAccess.getAllPickers();
+        for(int i = 0; i < allPickers.size(); i++) {
+            if(allPickers.get(i).getNumID() == id) {
+                return allPickers.get(i);
             }
         }
         return null;
@@ -103,30 +68,35 @@ public class Model {
 
 
     public List<Picker> getPickers(String date) {
+        Log.d("Model Activity", "getPickers() called " + date);
+        this.pickers = recordAccess.getPickers(date);
+        for(Picker p: this.pickers) {
+            p.insertRecord(date, new Record(date, bucketAccess.getBuckets(p.getNumID(), date)));
+        }
         return this.pickers;
     }
 
     public List<Bucket> getBuckets(int id, String date) {
-        for(int i = 0; i < this.pickers.size(); i++) {
-            if(this.pickers.get(i).getNumID() == id) {
-                return this.pickers.get(i).getRecord(date).getBuckets();
-            }
-        }
-        Log.d("model activity", "getBuckets returned null");
-        return null;
+        return bucketAccess.getBuckets(id, date);
+
     }
 
-    public void addBucket(int id, String date, double weight) {
+    public boolean addBucket(int id, String date, float weight) {
         String time = "";
         if(Build.VERSION.SDK_INT > 25) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
             LocalTime now = LocalTime.now();
             time = dtf.format(now);
         }
-        Picker picker = this.findPicker(id);
-        Bucket bucket = new Bucket(weight, time, date, id);
-        picker.addBucket(bucket, date);
-
+     //   Picker picker = this.findPicker(id);
+     //   Bucket bucket = new Bucket(weight, time, date, id);
+    //    picker.addBucket(bucket, date);
+        boolean tmp = bucketAccess.addBucket(id, date, time, weight);
+        Picker p = findPicker(id);
+        if (p.getRecord(date) == null) {
+            recordAccess.addDay(id, date);
+        }
+        return tmp;
     }
 
     public void addPicker(String name) {
@@ -136,9 +106,9 @@ public class Model {
             LocalDate now = LocalDate.now();
             date = dtf.format(now);
         }
-        Picker newPicker = new Picker(name, this.nextID, date);
-        pickers.add(newPicker);
-        this.nextID += 1;
+        int nextID = pickerAccess.getNextID();
+        pickerAccess.addPicker(name, nextID);
+        recordAccess.addDay(nextID, date);
     }
 
     public double getTotalDayPounds(String date) {
@@ -151,6 +121,18 @@ public class Model {
     }
 
     public int getNextID() {
-        return nextID;
+        return pickerAccess.getNextID();
+    }
+
+    public ArrayList<String> getAllPickers() {
+        return pickerAccess.getAllPickerNames();
+    }
+
+    public boolean deletePicker(int id) {
+        return pickerAccess.deletePicker(id);
+    }
+
+    public boolean deleteBucket(int id, String time) {
+        return bucketAccess.deleteBucket(id, time);
     }
 }

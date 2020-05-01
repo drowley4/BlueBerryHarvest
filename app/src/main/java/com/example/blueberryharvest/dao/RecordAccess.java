@@ -1,48 +1,40 @@
 package com.example.blueberryharvest.dao;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.example.blueberryharvest.data.Picker;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class RecordAccess {
-    public RecordAccess() {
+    private DatabaseHelper dbhelper;
+
+    public RecordAccess(Context c) {
+        dbhelper = DatabaseHelper.getInstance(c);
     }
 
-    public void create() throws SQLException {
-        try {
-            Database db = new Database();
-            Connection connection = db.getConnection();
+    public List<Picker> getPickers(String date) {
+        List<Picker> pickers = new ArrayList<>();
+        Picker p;
+        Cursor res = dbhelper.getPickers(date);
+        res.moveToFirst();
+        while (!res.isAfterLast()) {
+            p = new Picker(res.getString(res.getColumnIndex("NAME")), res.getInt(res.getColumnIndex("ID")));
+            pickers.add(p);
+            res.moveToNext();
+        }
 
-            String create = "create table if not exists Records (pickerID int not null, " +
-                    "date text not null, CONSTRAINT ID_Date PRIMARY KEY (pickerID,date))";
-            PreparedStatement stmt = connection.prepareStatement(create);
-            stmt.executeUpdate();
-            stmt.close();
-            db.closeConnection();
-        }
-        catch(SQLException sx) {
-            Log.d("record access activity", sx.toString());
-        }
+        res.close();
+        return pickers;
     }
 
-    public void insert(int pickerID, String date) throws SQLException {
-        try {
-            Database db = new Database();
-            Connection connection = db.getConnection();
-
-            String insert = "insert into Records values (?, ?) ";
-            PreparedStatement stmt = connection.prepareStatement(insert);
-            stmt.setInt(1, pickerID);
-            stmt.setString(2, date);
-            stmt.executeUpdate();
-            stmt.close();
-            db.closeConnection();
-        }
-        catch(SQLException sx) {
-            Log.d("record access activity", sx.toString());
-        }
+    public boolean addDay(int id, String date) {
+        return dbhelper.insertRecord(id, date);
     }
+
+
 }

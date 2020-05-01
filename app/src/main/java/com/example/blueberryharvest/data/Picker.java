@@ -18,11 +18,19 @@ public class Picker {
         this.records = new HashMap<String, Record>();
     }
 
-    public Picker(String name, int numID, String date) {
+    public Picker(String name, int numID) {
         this.name = name;
         this.numID = numID;
         this.records = new HashMap<String, Record>();
-        this.insertRecord(date);
+    }
+
+    @Override
+    public String toString() {
+        return "Picker{" +
+                "name='" + name + '\'' +
+                ", numID=" + numID +
+                ", records=" + records +
+                '}';
     }
 
     public String getName() {
@@ -45,8 +53,8 @@ public class Picker {
         this.numID = numID;
     }
 
-    private void insertRecord(String date) {
-        this.records.put(date, new Record(date));
+    public void insertRecord(String date, Record record) {
+        this.records.put(date, record);
     }
 
     public void addBucket(Bucket bucket, String date) {
