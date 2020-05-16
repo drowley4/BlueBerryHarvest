@@ -11,4 +11,6 @@
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="delete_picker">Delete Picker</string>
+    <string name="cancel">Cancel</string>
+    <string name="update">Update</string>
 </resources>

@@ -58,4 +58,12 @@ public class PickerAccess {
         return dbhelper.deletePicker(id);
     }
 
+    public boolean updatePicker(int id, String name, String email) {
+        return dbhelper.updatePicker(id, name, email);
+    }
+
+    public String getEmail(int id) {
+        return dbhelper.getEmail(id);
+    }
+
 }

@@ -1,0 +1,36 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:textSize="24sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/name_editview"
+        android:hint="New Full Name"/>
+    <EditText
+        android:textSize="24sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/email_editview"
+        android:hint="Email"
+        android:layout_below="@+id/name_editview"/>
+    <Button
+        android:id="@+id/update_picker_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update Picker"
+        android:layout_below="@+id/email_editview"/>
+
+    <Button
+        android:id="@+id/cancel_picker_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:layout_below="@+id/email_editview"
+        android:layout_toRightOf="@+id/update_picker_button"
+        android:layout_toEndOf="@+id/update_picker_button"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp" />
+
+</RelativeLayout>

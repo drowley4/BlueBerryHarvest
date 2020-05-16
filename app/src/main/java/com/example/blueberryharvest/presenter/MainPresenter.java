@@ -56,4 +56,12 @@ public class MainPresenter {
             return false;
         }
     }
+
+    public String backup(String date) {
+        return model.backupDatabase(date);
+    }
+
+    public String export(String date) {
+        return model.exportDatabase(date);
+    }
 }

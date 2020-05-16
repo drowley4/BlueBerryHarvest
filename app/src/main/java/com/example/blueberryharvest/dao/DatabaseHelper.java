@@ -25,6 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // pickers table's column names
     private static final String PICKER_COL_1 = "ID";
     private static final String PICKER_COL_2 = "NAME";
+    private static final String PICKER_COL_3 = "EMAIL";
 
     // buckets table's column names
     private static final String BUCKET_COL_1 = "ID";
@@ -38,7 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String RECORD_COL_3 = "TOTAL";
 
     // create table statements
-    private static final String CREATE_PICKERS_TABLE = "create table " + TABLE_PICKERS + " (ID INTEGER PRIMARY KEY, NAME TEXT)";
+    private static final String CREATE_PICKERS_TABLE = "create table " + TABLE_PICKERS + " (ID INTEGER PRIMARY KEY, NAME TEXT, EMAIL TEXT)";
     private static final String CREATE_BUCKETS_TABLE = "create table " + TABLE_BUCKETS + " (ID INTEGER, DATE TEXT, TIME TEXT, WEIGHT FLOAT, CONSTRAINT PK_Bucket PRIMARY KEY (ID,TIME))";
     private static final String CREATE_RECORDS_TABLE = "create table " + TABLE_RECORDS + " (ID INTEGER, DATE TEXT, TOTAL FLOAT, CONSTRAINT PK_Record PRIMARY KEY (ID, DATE))";
 
@@ -56,7 +57,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     private DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 1);
+        super(context, DATABASE_NAME, null, 2);
     }
 
     @Override
@@ -68,10 +69,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(DROP_PICKERS_TABLE);
+        db.execSQL("ALTER TABLE " + TABLE_PICKERS + " ADD COLUMN EMAIL TEXT");
+     /*   db.execSQL(DROP_PICKERS_TABLE);
         db.execSQL(DROP_BUCKETS_TABLE);
         db.execSQL(DROP_RECORDS_TABLE);
-        onCreate(db);
+        onCreate(db);*/
     }
 
     public boolean insertPicker(int id, String name) {
@@ -110,11 +112,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateRecord(int id, String date, float weight) {
+    public boolean updateBucket(int id, String date, float weight) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(RECORD_COL_3, weight);
         if(db.update(TABLE_RECORDS, values, "ID=? AND DATE=?", new String[]{Integer.toString(id), date}) == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean updatePicker(int id, String name, String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        if(!name.equals("")) {
+            values.put(PICKER_COL_2, name);
+        }
+        if(!email.equals("")) {
+            values.put(PICKER_COL_3, email);
+        }
+        if(db.update(TABLE_PICKERS, values, "ID=?", new String[]{Integer.toString(id)}) == 1) {
             return true;
         }
         return false;
@@ -166,5 +183,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(TABLE_RECORDS, "ID=?", new String[]{Integer.toString(id)});
         db.delete(TABLE_PICKERS, "ID=?", new String[]{Integer.toString(id)});
         return true;
+    }
+
+    public String getEmail(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT EMAIL FROM " + TABLE_PICKERS + " WHERE Pickers.ID=?", new String[]{Integer.toString(id)});
+        cursor.moveToFirst();
+        return cursor.getString(cursor.getColumnIndex("EMAIL"));
     }
 }

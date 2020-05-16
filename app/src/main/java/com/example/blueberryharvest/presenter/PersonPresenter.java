@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.blueberryharvest.data.Bucket;
 import com.example.blueberryharvest.data.Model;
+import com.example.blueberryharvest.data.Picker;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -21,6 +22,18 @@ public class PersonPresenter {
 
     public boolean deleteBucket(int id, String time) {
         return model.deleteBucket(id, time.substring(6));
+    }
+
+    public boolean updatePicker(String name, int id, String email) {
+        return model.updatePicker(id, name, email);
+    }
+
+    public String getEmail(int id) {
+        String tmp = model.getEmail(id);
+        if(tmp == null) {
+            return "";
+        }
+        return tmp;
     }
 
 }

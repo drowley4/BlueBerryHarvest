@@ -1,56 +1,90 @@
-<LinearLayout android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
+<RelativeLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBerry"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/colorPrimary">
+        android:id="@+id/topLinear">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:id="@+id/firstLinear">
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/add_picker_button"
-                android:text="@string/add_picker"/>
+                android:text="@string/add_picker"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"/>
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/add_bucket_button"
-                android:text="@string/add_bucket"/>
+                android:text="@string/add_bucket"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/date_textview"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"/>
 
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:id="@+id/secondLinear">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/total_day_pounds"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"/>
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/delete_picker_button"
-                android:text="@string/delete_picker"/>
+                android:text="@string/delete_picker"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/Linear">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/backup_button"
+                android:text="BACK UP DATA"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp" />
+
+            <Button
+                android:id="@+id/export_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:text="EXPORT DATA" />
         </LinearLayout>
 
     </LinearLayout>
@@ -60,9 +94,11 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/picker_list">
+        android:id="@+id/picker_list"
+        android:layout_below="@+id/topLinear"
+        android:background="@color/colorLightBerry">
 
     </ListView>
 
 
-</LinearLayout>
+</RelativeLayout>

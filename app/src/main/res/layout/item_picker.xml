@@ -9,13 +9,13 @@
         android:orientation="horizontal">
 
         <TextView
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/id_textview" />
 
         <TextView
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/name_textview"
@@ -25,7 +25,7 @@
     </LinearLayout>
 
     <TextView
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:id="@+id/total_pounds_textview"

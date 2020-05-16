@@ -1,9 +1,16 @@
 package com.example.blueberryharvest.activity;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,11 +32,14 @@ import com.example.blueberryharvest.presenter.MainPresenter;
 import com.example.blueberryharvest.uihelp.PickerAdapter;
 
 
+import java.io.File;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity {
     private MainPresenter presenter;
@@ -56,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
         Button deletePickerButton = (Button) findViewById(R.id.delete_picker_button);
         dateTextView = (TextView) findViewById(R.id.date_textview);
         this.totalPoundsView = (TextView) findViewById(R.id.total_day_pounds);
+        Button backupButton = (Button) findViewById(R.id.backup_button);
+        Button exportButton = (Button) findViewById(R.id.export_button);
 
         this.date = "";
 
@@ -123,6 +135,46 @@ public class MainActivity extends AppCompatActivity {
                 changeDate();
             }
         });
+
+        backupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                verifyStoragePermissions(MainActivity.this);
+                String csv = presenter.backup(date);
+                /*File file = new File(csv);
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                i.putExtra(Intent.EXTRA_EMAIL, new String[] { "ddonrowley@gmail.com" });
+                i.putExtra(Intent.EXTRA_SUBJECT,"sub");
+                i.putExtra(Intent.EXTRA_TEXT, "body");
+                Uri uri = FileProvider.getUriForFile(getApplicationContext(), "com.example.blueberryharvest.myprovider", file);
+                i.putExtra(Intent.EXTRA_STREAM, uri);
+                i.setType("message/rfc822");
+
+                startActivity(Intent.createChooser(i, "Send feedback..."));*/
+            }
+        });
+
+        exportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                verifyStoragePermissions(MainActivity.this);
+                String csv = presenter.export(date);
+                File file = new File(csv);
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                i.putExtra(Intent.EXTRA_EMAIL, new String[] { "ddonrowley@gmail.com" });
+                i.putExtra(Intent.EXTRA_SUBJECT,"Blueberry totals for " + date);
+                Uri uri = FileProvider.getUriForFile(getApplicationContext(), "com.example.blueberryharvest.myprovider", file);
+                i.putExtra(Intent.EXTRA_STREAM, uri);
+                i.setType("message/rfc822");
+
+                startActivity(Intent.createChooser(i, "Send Records..."));
+            }
+        });
+
     }
 
     private void changeDate() {
@@ -161,10 +213,11 @@ public class MainActivity extends AppCompatActivity {
     private void addBucket() {
         this.myDialog.setContentView(R.layout.add_bucket);
         Button addBucketButton = (Button) this.myDialog.findViewById(R.id.add_bucket_button);
+        Button cancelButton = (Button) this.myDialog.findViewById(R.id.cancel_bucket_button);
         final AutoCompleteTextView nameidEditView = (AutoCompleteTextView) this.myDialog.findViewById(R.id.name_editview);
-        ArrayList<String> pickerNamesID = presenter.getAllPickers();
+        final ArrayList<String> pickerNamesID = presenter.getAllPickers();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,pickerNamesID);
-        nameidEditView.setDropDownHeight(180);
+        nameidEditView.setDropDownHeight(500);
         nameidEditView.setThreshold(1);
         nameidEditView.setAdapter(adapter);
         final String[] numbers = new String[32];
@@ -184,7 +237,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String nameID = nameidEditView.getText().toString();
                 int weightIndex = weightPicker.getValue();
-                if(presenter.addBucket(nameID, date, Float.parseFloat(numbers[weightIndex]))) {
+                if(pickerNamesID.contains(nameID)) {
+                    presenter.addBucket(nameID, date, Float.parseFloat(numbers[weightIndex]));
                     myDialog.dismiss();
                     updatePickers();
                     Toast.makeText(getApplicationContext(), "Bucket Added", Toast.LENGTH_SHORT).show();
@@ -192,6 +246,13 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     Toast.makeText(getApplicationContext(), "Please Select a Valid Picker", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
             }
         });
 
@@ -203,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
         TextView idView = (TextView) myDialog.findViewById(R.id.id_textview);
         final EditText nameView = (EditText) myDialog.findViewById(R.id.name_editview);
         Button addPickerButton = (Button) myDialog.findViewById(R.id.add_picker_button);
+        Button cancelButton = (Button) myDialog.findViewById(R.id.cancel_picker_button);
 
         String id = "ID: " + this.presenter.getNextID();
         idView.setText(id);
@@ -217,16 +279,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
         this.myDialog.show();
     }
 
     private void deletePicker() {
         this.myDialog.setContentView(R.layout.delete_picker);
         Button deletebutton = (Button) this.myDialog.findViewById(R.id.delete_button);
+        Button cancelbutton = (Button) this.myDialog.findViewById(R.id.cancel_picker_button);
         final AutoCompleteTextView nameidEditView = (AutoCompleteTextView) this.myDialog.findViewById(R.id.name_editview);
-        ArrayList<String> pickerNamesID = presenter.getAllPickers();
+        final ArrayList<String> pickerNamesID = presenter.getAllPickers();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,pickerNamesID);
-        nameidEditView.setDropDownHeight(180);
+        nameidEditView.setDropDownHeight(500);
         nameidEditView.setThreshold(1);
         nameidEditView.setAdapter(adapter);
 
@@ -234,10 +304,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String nameID = nameidEditView.getText().toString();
-                myDialog.dismiss();
-                helpDelete(nameID);
+                if(pickerNamesID.contains(nameID)) {
+                    myDialog.dismiss();
+                    helpDelete(nameID);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Please Select a Valid Picker", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+
+        cancelbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
         this.myDialog.show();
     }
 
@@ -278,6 +361,20 @@ public class MainActivity extends AppCompatActivity {
         this.pickers.addAll(this.presenter.getPickers(this.date));
         this.pickerAdapter.date = this.date;
         this.pickerAdapter.notifyDataSetChanged();
+    }
+
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1
+            );
+        }
     }
 
 }

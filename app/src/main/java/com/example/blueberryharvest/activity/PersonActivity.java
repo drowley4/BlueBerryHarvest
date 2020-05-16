@@ -1,5 +1,6 @@
 package com.example.blueberryharvest.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,10 +9,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +33,10 @@ public class PersonActivity extends AppCompatActivity {
     private String harvestDate;
     private BucketAdapter bucketAdapter;
     private TextView dateTextView;
+    private TextView nameView;
+    private TextView emailTextView;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +50,13 @@ public class PersonActivity extends AppCompatActivity {
         }
         this.myDialog = new Dialog(this);
         TextView idView = (TextView) findViewById(R.id.id_textview);
-        TextView nameView = (TextView) findViewById(R.id.name_textview);
+        this.nameView = (TextView) findViewById(R.id.name_textview);
+        Button updateButton = (Button) findViewById(R.id.update_picker_button);
+        TextView totalTextView = (TextView) findViewById(R.id.total_textview);
+        emailTextView = (TextView) findViewById(R.id.email_textview);
+
         this.dateTextView = (TextView) findViewById(R.id.date_textview);
+
 
         Intent intentExtras = getIntent();
         this.pickerID = intentExtras.getIntExtra("id", 0);
@@ -59,16 +68,30 @@ public class PersonActivity extends AppCompatActivity {
         final ListView bucketListView = (ListView) findViewById(R.id.bucket_list);
         bucketListView.setAdapter(bucketAdapter);
 
+        double total = 0;
+        for(Bucket b: this.buckets) {
+            total += b.getWeight();
+        }
+        totalTextView.setText("Total: " + Double.toString(total));
+
         String id = "ID: " + this.pickerID + "";
         idView.setText(id);
         String name = "Name: " + pickerName;
-        nameView.setText(name);
+        this.nameView.setText(name);
         this.dateTextView.setText(this.harvestDate);
+        this.emailTextView.setText("Email: " + presenter.getEmail(pickerID));
 
         this.dateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 changeDate();
+            }
+        });
+
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updatePicker();
             }
         });
 
@@ -80,6 +103,7 @@ public class PersonActivity extends AppCompatActivity {
                 deleteBucket(timeTextView.getText().toString(), weightTextView.getText().toString());
             }
         });
+
 
     }
 
@@ -154,5 +178,48 @@ public class PersonActivity extends AppCompatActivity {
         this.buckets.clear();
         this.buckets.addAll(presenter.getBuckets(this.pickerID, this.harvestDate));
         this.bucketAdapter.notifyDataSetChanged();
+    }
+
+    private void updatePicker() {
+        this.myDialog.setContentView(R.layout.update_picker);
+
+        Button updateButton = (Button) this.myDialog.findViewById(R.id.update_picker_button);
+        Button cancelButton = (Button) this.myDialog.findViewById(R.id.cancel_picker_button);
+        final EditText nameEditText = (EditText) this.myDialog.findViewById(R.id.name_editview);
+        final EditText emailEditText = (EditText) this.myDialog.findViewById(R.id.email_editview);
+
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String tmp = nameEditText.getText().toString();
+                String email = emailEditText.getText().toString();
+                if(tmp.equals("") && email.equals("")) {
+                    Toast.makeText(getApplicationContext(), "Nothing to update", Toast.LENGTH_LONG).show();
+                }
+                else if(presenter.updatePicker(tmp, pickerID, email)) {
+                    Toast.makeText(getApplicationContext(), "Picker Updated", Toast.LENGTH_SHORT).show();
+                    if(!tmp.equals("")) {
+                        nameView.setText(tmp);
+                    }
+                    if(!email.equals("")) {
+                        emailTextView.setText(email);
+                    }
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Picker Update Failed", Toast.LENGTH_LONG).show();
+                }
+                myDialog.dismiss();
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+
+        this.myDialog.show();
     }
 }
