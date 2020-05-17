@@ -19,16 +19,8 @@ public class Bucket {
         return weight;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
     public String getTime() {
         return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
     }
 
     public String getDate() {
@@ -39,7 +31,4 @@ public class Bucket {
         this.date = date;
     }
 
-    public int getPickerID() {
-        return pickerID;
-    }
 }

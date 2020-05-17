@@ -1,14 +1,23 @@
 <RelativeLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@color/colorBerry"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:id="@+id/topLinear">
+        android:id="@+id/topLinear"
+        android:layout_below="@id/my_toolbar">
 
         <TextView
             android:layout_width="wrap_content"
@@ -22,7 +31,6 @@
             android:layout_height="match_parent"
             android:id="@+id/name_textview"
             android:layout_marginStart="10dp"
-            android:layout_marginLeft="10dp"
             android:textSize="30sp"
             android:textStyle="bold"
             android:layout_marginBottom="5dp"/>
@@ -34,8 +42,17 @@
         android:layout_height="wrap_content"
         android:id="@+id/email_textview"
         android:textSize="20sp"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="10dp"
         android:layout_below="@+id/topLinear"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/email_button"
+        android:textSize="18sp"
+        android:text="@string/email"
+        android:layout_below="@id/topLinear"
+        android:layout_alignParentEnd="true"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -43,7 +60,7 @@
         android:id="@+id/date_textview"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="10dp"
         android:layout_below="@+id/email_textview"/>
 
     <TextView
@@ -52,20 +69,17 @@
         android:id="@+id/total_textview"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="10dp"
         android:layout_below="@+id/email_textview"
-        android:layout_toRightOf="@id/date_textview"
         android:layout_toEndOf="@id/date_textview"
-        android:layout_marginLeft="20dp"
         android:layout_marginStart="20dp" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/update_picker_button"
-        android:textSize="24sp"
+        android:textSize="18sp"
         android:text="@string/update"
-        android:layout_alignParentRight="true"
         android:layout_below="@+id/email_textview"
         android:layout_alignParentEnd="true" />
 

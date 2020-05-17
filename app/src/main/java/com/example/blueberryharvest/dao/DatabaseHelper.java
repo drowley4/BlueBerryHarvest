@@ -3,13 +3,9 @@ package com.example.blueberryharvest.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance = null;
@@ -48,7 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DROP_BUCKETS_TABLE = "DROP TABLE IF EXISTS " + TABLE_BUCKETS;
     private static final String DROP_RECORDS_TABLE = "DROP TABLE IF EXISTS " + TABLE_RECORDS;
 
-    public static DatabaseHelper getInstance(Context context) {
+    static DatabaseHelper getInstance(Context context) {
         if (instance == null) {
             instance = new DatabaseHelper(context.getApplicationContext());
         }
@@ -131,6 +127,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if(!email.equals("")) {
             values.put(PICKER_COL_3, email);
         }
+        Log.d("activity", Integer.toString(id));
+        Log.d("activity", email);
         if(db.update(TABLE_PICKERS, values, "ID=?", new String[]{Integer.toString(id)}) == 1) {
             return true;
         }
@@ -189,6 +187,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT EMAIL FROM " + TABLE_PICKERS + " WHERE Pickers.ID=?", new String[]{Integer.toString(id)});
         cursor.moveToFirst();
-        return cursor.getString(cursor.getColumnIndex("EMAIL"));
+        if(cursor.isAfterLast()) {
+            cursor.close();
+            return null;
+        }
+        String tmp = cursor.getString(cursor.getColumnIndex("EMAIL"));
+        cursor.close();
+        return tmp;
     }
+
+    public boolean isThere(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT ID FROM " + TABLE_PICKERS + " WHERE Pickers.ID=?", new String[]{Integer.toString(id)});
+        cursor.moveToFirst();
+        if(cursor.isAfterLast()) {
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
+
 }

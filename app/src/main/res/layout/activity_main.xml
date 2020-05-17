@@ -1,14 +1,22 @@
 <RelativeLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorBerry"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:id="@+id/topLinear">
-
+        android:id="@+id/topLinear"
+        android:layout_below="@+id/my_toolbar">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -20,16 +28,16 @@
                 android:layout_height="match_parent"
                 android:id="@+id/add_picker_button"
                 android:text="@string/add_picker"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"/>
+                android:textSize="17sp"
+                android:layout_marginStart="10dp" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/add_bucket_button"
                 android:text="@string/add_bucket"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"/>
+                android:textSize="17sp"
+                android:layout_marginStart="10dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -37,8 +45,7 @@
                 android:id="@+id/date_textview"
                 android:textSize="26sp"
                 android:textStyle="bold"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"/>
+                android:layout_marginStart="10dp" />
 
         </LinearLayout>
         <LinearLayout
@@ -53,38 +60,8 @@
                 android:id="@+id/total_day_pounds"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"/>
+                android:layout_marginStart="10dp" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:id="@+id/delete_picker_button"
-                android:text="@string/delete_picker"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/Linear">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:id="@+id/backup_button"
-                android:text="BACK UP DATA"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp" />
-
-            <Button
-                android:id="@+id/export_button"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"
-                android:text="EXPORT DATA" />
         </LinearLayout>
 
     </LinearLayout>
@@ -96,6 +73,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/picker_list"
         android:layout_below="@+id/topLinear"
+        android:layout_marginTop="10dp"
         android:background="@color/colorLightBerry">
 
     </ListView>

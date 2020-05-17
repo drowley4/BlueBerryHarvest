@@ -21,9 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/cancel"
-        android:layout_toRightOf="@+id/delete_button"
         android:layout_toEndOf="@+id/delete_button"
         android:layout_below="@id/name_editview"
-        android:layout_marginLeft="10dp"/>
+        android:layout_marginStart="10dp"/>
 
 </RelativeLayout>

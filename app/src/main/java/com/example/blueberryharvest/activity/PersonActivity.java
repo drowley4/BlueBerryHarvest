@@ -3,11 +3,18 @@ package com.example.blueberryharvest.activity;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -22,8 +29,13 @@ import com.example.blueberryharvest.data.Bucket;
 import com.example.blueberryharvest.presenter.PersonPresenter;
 import com.example.blueberryharvest.uihelp.BucketAdapter;
 
+import java.io.File;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static com.example.blueberryharvest.activity.MainActivity.verifyStoragePermissions;
 
 public class PersonActivity extends AppCompatActivity {
     private PersonPresenter presenter;
@@ -42,7 +54,12 @@ public class PersonActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person);
         Log.d("person activity", "onCreate() called");
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar ab = getSupportActionBar();
+        if(ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
         try {
             presenter = new PersonPresenter(this);
         } catch (SQLException e) {
@@ -52,6 +69,7 @@ public class PersonActivity extends AppCompatActivity {
         TextView idView = (TextView) findViewById(R.id.id_textview);
         this.nameView = (TextView) findViewById(R.id.name_textview);
         Button updateButton = (Button) findViewById(R.id.update_picker_button);
+        Button emailButton = (Button) findViewById(R.id.email_button);
         TextView totalTextView = (TextView) findViewById(R.id.total_textview);
         emailTextView = (TextView) findViewById(R.id.email_textview);
 
@@ -95,6 +113,19 @@ public class PersonActivity extends AppCompatActivity {
             }
         });
 
+        emailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = presenter.getEmail(pickerID);
+                if(!email.equals("")) {
+                    emailPicker();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "No Email given to send to", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         bucketListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -107,12 +138,40 @@ public class PersonActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
+                startActivity(intent);
+                return true;
+
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
     private void changeDate() {
         this.myDialog.setContentView(R.layout.change_date);
         Button changeDateButton = (Button) this.myDialog.findViewById(R.id.change_date_button);
         final TextView dTextView = (TextView) this.myDialog.findViewById(R.id.date_textview);
         CalendarView calendarView = (CalendarView) this.myDialog.findViewById(R.id.calender_view);
-
+        if(Build.VERSION.SDK_INT > 25) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+            LocalDate now = LocalDate.now();
+            harvestDate = dtf.format(now);
+            dTextView.setText(harvestDate);
+        }
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
@@ -199,6 +258,7 @@ public class PersonActivity extends AppCompatActivity {
                 else if(presenter.updatePicker(tmp, pickerID, email)) {
                     Toast.makeText(getApplicationContext(), "Picker Updated", Toast.LENGTH_SHORT).show();
                     if(!tmp.equals("")) {
+                        String name = "Name: " + tmp;
                         nameView.setText(tmp);
                     }
                     if(!email.equals("")) {
@@ -221,5 +281,22 @@ public class PersonActivity extends AppCompatActivity {
 
 
         this.myDialog.show();
+    }
+
+    private void emailPicker() {
+        String date = dateTextView.getText().toString();
+        verifyStoragePermissions(PersonActivity.this);
+        String csv = presenter.email(date, pickerID);
+        File file = new File(csv);
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        i.putExtra(Intent.EXTRA_EMAIL, new String[] { presenter.getEmail(pickerID) });
+        i.putExtra(Intent.EXTRA_SUBJECT,"Blueberry total for " + date);
+        Uri uri = FileProvider.getUriForFile(getApplicationContext(), "com.example.blueberryharvest.myprovider", file);
+        i.putExtra(Intent.EXTRA_STREAM, uri);
+        i.setType("message/rfc822");
+
+        startActivity(Intent.createChooser(i, "Send Records..."));
     }
 }

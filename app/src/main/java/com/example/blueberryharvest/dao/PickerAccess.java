@@ -2,13 +2,10 @@ package com.example.blueberryharvest.dao;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
-import com.example.blueberryharvest.data.Bucket;
 import com.example.blueberryharvest.data.Picker;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class PickerAccess {
@@ -28,12 +25,18 @@ public class PickerAccess {
 
     public ArrayList<String> getAllPickerNames() {
         String id;
+        int tmp;
         String name;
         ArrayList<String> names = new ArrayList<>();
         Cursor res = dbhelper.getPickerNames();
         res.moveToFirst();
         while(!res.isAfterLast()) {
-            id = Integer.toString(res.getInt(res.getColumnIndex("ID")));
+            tmp = res.getInt(res.getColumnIndex("ID"));
+            if(tmp < 0) {
+                res.moveToNext();
+                continue;
+            }
+            id = Integer.toString(tmp);
             name = res.getString(res.getColumnIndex("NAME"));
             names.add(name + " " + id);
             res.moveToNext();
@@ -64,6 +67,10 @@ public class PickerAccess {
 
     public String getEmail(int id) {
         return dbhelper.getEmail(id);
+    }
+
+    public boolean isThere(int id) {
+        return dbhelper.isThere(id);
     }
 
 }

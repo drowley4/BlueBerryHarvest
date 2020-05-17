@@ -118,6 +118,20 @@ public class Model {
         recordAccess.addDay(nextID, date);
     }
 
+    public void updateBackupEmail(String email) {
+        if(!pickerAccess.isThere(-1)) {
+            pickerAccess.addPicker("backup", -1);
+        }
+        updatePicker(-1, "", email);
+    }
+
+    public void updateExportEmail(String email) {
+        if(!pickerAccess.isThere(-2)) {
+            pickerAccess.addPicker("export", -2);
+        }
+        updatePicker(-2, "", email);
+    }
+
     public boolean updatePicker(int id, String name, String email) {
         return pickerAccess.updatePicker(id, name, email);
     }
@@ -175,8 +189,13 @@ public class Model {
 
     public String exportDatabase(String date) {
         List<Picker> pickers = sortPickersID(getPickers(date));
+        String folder_name = "blueberrytotals";
+        File f = new File(Environment.getExternalStorageDirectory(), folder_name);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
         String nDate = date.substring(0,2) + "_" + date.substring(3,5) + "_" + date.substring(6,10);
-        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + nDate + ".csv");
+        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/blueberrytotals/" + nDate + ".csv");
         CSVWriter writer = null;
         try {
             writer = new CSVWriter(new FileWriter(csv));
@@ -188,8 +207,11 @@ public class Model {
             String[] arr2 = new String[2];
             arr2[1] = "0";
             for(Picker p: pickers) {
+                if(p.getNumID() < 0) {
+                    continue;
+                }
                 List<Bucket> buckets = p.getRecord(date).getBuckets();
-                arr = new String[buckets.size()+1];
+                arr = new String[2];
                 arr[0] = p.getName();
                 double total = 0;
                 for(Bucket b: buckets) {
@@ -213,6 +235,61 @@ public class Model {
         return csv;
     }
 
+    public String exportIndividual(int id, String date) {
+        List<Picker> pickers = sortPickersID(getPickers(date));
+        Picker p = null;
+        for(Picker pi: pickers) {
+            if(pi.getNumID() == id) {
+                p = pi;
+                break;
+            }
+        }
+        String folder_name = "blueberryindividuals";
+        File f = new File(Environment.getExternalStorageDirectory(), folder_name);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        String nDate = date.substring(0,2) + "_" + date.substring(3,5) + "_" + date.substring(6,10);
+        String title = "id=" + p.getNumID() + "_" + nDate;
+        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/blueberryindividuals/" + title + ".csv");
+        CSVWriter writer = null;
+        try {
+            writer = new CSVWriter(new FileWriter(csv));
+
+            List<String[]> data = new ArrayList<String[]>();
+            String[] arr = {"name"};
+            String[] arr2;
+            data.add(arr);
+            List<Bucket> buckets = p.getRecord(date).getBuckets();
+            arr = new String[buckets.size()+1];
+            arr2 = new String[buckets.size()+1];
+            int index = 1;
+            arr[0] = p.getName();
+            arr2[0] = "time";
+            double total = 0;
+            for(Bucket b: buckets) {
+                total += b.getWeight();
+                arr[index] = Double.toString(b.getWeight());
+                arr2[index] = b.getTime().substring(0, 5);
+                index++;
+            }
+            data.add(arr);
+            data.add(arr2);
+            arr = new String[2];
+            arr[0] = "total";
+            arr[1] = Double.toString(total);
+            data.add(arr);
+
+
+            writer.writeAll(data); // data is adding to csv
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return csv;
+    }
+
     public String backupDatabase(String date) {
         List<Picker> pickers = getPickers(date);
         String time = "0";
@@ -221,7 +298,12 @@ public class Model {
             LocalTime now = LocalTime.now();
             time = dtf.format(now);
         }
-        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/T" + time + ".csv");
+        String folder_name = "blueberrybackups";
+        File f = new File(Environment.getExternalStorageDirectory(), folder_name);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/blueberrybackups/T" + time + ".csv");
         CSVWriter writer = null;
         try {
             writer = new CSVWriter(new FileWriter(csv));
@@ -231,6 +313,9 @@ public class Model {
             String[] arr2;
             data.add(arr);
             for(Picker p: pickers) {
+                if(p.getNumID() < 0) {
+                    continue;
+                }
                 List<Bucket> buckets = p.getRecord(date).getBuckets();
                 arr = new String[buckets.size()+1];
                 arr2 = new String[buckets.size()+1];

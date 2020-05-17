@@ -13,4 +13,11 @@
     <string name="delete_picker">Delete Picker</string>
     <string name="cancel">Cancel</string>
     <string name="update">Update</string>
+    <string name="setting">Settings</string>
+    <string name="export">Export Data</string>
+    <string name="backup">Back Up Data</string>
+    <string name="backup_email">Back Up Email:</string>
+    <string name="export_email">Export Email:</string>
+    <string name="email">Email</string>
+    <string name="hint_name">New Full Name</string>
 </resources>

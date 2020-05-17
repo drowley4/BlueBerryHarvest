@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.example.blueberryharvest.data.Bucket;
 import com.example.blueberryharvest.data.Model;
-import com.example.blueberryharvest.data.Picker;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -34,6 +33,11 @@ public class PersonPresenter {
             return "";
         }
         return tmp;
+    }
+
+    public String email(String date, int id) {
+        return model.exportIndividual(id, date);
+
     }
 
 }

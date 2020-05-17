@@ -1,7 +1,6 @@
 package com.example.blueberryharvest.data;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Record {
@@ -12,7 +11,7 @@ public class Record {
 
     private List<Bucket> buckets;
 
-    public Record(String date, List<Bucket> buckets) {
+    Record(String date, List<Bucket> buckets) {
         this.date = date;
         this.buckets = buckets;
         this.sum();
@@ -32,23 +31,9 @@ public class Record {
         return date;
     }
 
-    public List<Bucket> getBuckets() {
+    List<Bucket> getBuckets() {
         return buckets;
     }
 
-    public void insertBucket(Bucket bucket) {
-        this.buckets.add(bucket);
-        this.totalPounds = this.totalPounds + bucket.getWeight();
-    }
 
-    public Boolean removeBucket(Bucket bucket) {
-        if(this.buckets.contains(bucket)) {
-            this.totalPounds = this.totalPounds - bucket.getWeight();
-            this.buckets.remove(bucket);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 }

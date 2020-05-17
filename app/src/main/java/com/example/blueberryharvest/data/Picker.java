@@ -6,17 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Picker {
-    private String name = "";
+    private String name;
 
     private int numID;
 
     private Map<String, Record> records;
-
-    public Picker() {
-        this.name = "";
-        this.numID = 0;
-        this.records = new HashMap<String, Record>();
-    }
 
     public Picker(String name, int numID) {
         this.name = name;
@@ -49,23 +43,8 @@ public class Picker {
         this.name = name;
     }
 
-    public void setNumID(int numID) {
-        this.numID = numID;
-    }
-
     public void insertRecord(String date, Record record) {
         this.records.put(date, record);
     }
 
-    public void addBucket(Bucket bucket, String date) {
-        Record record = this.records.get(date);
-        if(record != null) {
-            record.insertBucket(bucket);
-            this.records.put(date, record);
-        }
-        else {
-            Log.d("Picker activity", "addBucket returned null");
-        }
-
-    }
 }

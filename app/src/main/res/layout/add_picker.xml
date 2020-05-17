@@ -14,8 +14,7 @@
         android:layout_height="wrap_content"
         android:text="@string/add_picker"
         android:layout_below="@+id/name_editview"
-        android:layout_toEndOf="@+id/id_textview"
-        android:layout_toRightOf="@+id/id_textview"/>
+        android:layout_toEndOf="@+id/id_textview" />
 
     <Button
         android:id="@+id/cancel_picker_button"
@@ -23,9 +22,7 @@
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         android:layout_below="@+id/name_editview"
-        android:layout_toRightOf="@+id/add_picker_button"
         android:layout_toEndOf="@+id/add_picker_button"
-        android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp" />
 
     <TextView
@@ -34,7 +31,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/id_textview"
         android:layout_below="@+id/name_editview"
-        android:layout_marginRight="10dp"
         android:layout_marginEnd="10dp" />
 
 
