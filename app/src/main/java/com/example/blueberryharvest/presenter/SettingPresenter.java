@@ -15,6 +15,10 @@ public class SettingPresenter extends Presenter {
         return super.model.deletePicker(tmp);
     }
 
+    public void switchCherrySetting() {
+        model.changeCherrySetting();
+    }
+
     public String backup(String date) {
         return super.model.backupDatabase(date);
     }
@@ -37,5 +41,9 @@ public class SettingPresenter extends Presenter {
 
     public String getBackupEmail() {
         return super.model.getEmail(-1);
+    }
+
+    public void cleanFolders() {
+        model.cleanFolders();
     }
 }

@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -23,6 +24,7 @@ import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        updateBackgroud();
         this.myDialog = new Dialog(this);
         Button addPickerButton = (Button) findViewById(R.id.add_picker_button);
         Button addBucketButton = (Button) findViewById(R.id.add_bucket_button);
@@ -199,7 +202,13 @@ public class MainActivity extends AppCompatActivity {
         nameidEditView.setDropDownHeight(500);
         nameidEditView.setThreshold(1);
         nameidEditView.setAdapter(adapter);
-        final String[] numbers = new String[32];
+        final String[] numbers;
+        if(presenter.getCherrySetting().equals("cherry")) {
+            numbers = new String[120];
+        }
+        else {
+            numbers = new String[32];
+        }
         double num = 0.25;
         for(int i = 0; i < numbers.length; i++) {
             numbers[i] = Double.toString(num);
@@ -296,6 +305,25 @@ public class MainActivity extends AppCompatActivity {
                     new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1
             );
+        }
+    }
+
+    private void updateBackgroud() {
+        String type = presenter.getCherrySetting();
+        RelativeLayout tmp = findViewById(R.id.everything);
+        Toolbar toolbar = findViewById(R.id.my_toolbar);
+        ListView pickerList = findViewById(R.id.picker_list);
+        if(type.equals("cherry")) {
+            setTitle("Cherry Harvest");
+            tmp.setBackgroundColor(ContextCompat.getColor(this, R.color.colorCherry));
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorCherry));
+            pickerList.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightCherry));
+        }
+        else if(type.equals("blueberry")) {
+            setTitle("Blueberry Harvest");
+            tmp.setBackgroundColor(ContextCompat.getColor(this, R.color.colorBerry));
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorBerry));
+            pickerList.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightBerry));
         }
     }
 

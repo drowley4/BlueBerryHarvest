@@ -7,14 +7,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/name_editview"
-        android:hint="@string/hint_name"/>
+        android:hint="@string/hint_name"
+        android:inputType="text"
+        android:autofillHints="@string/email" />
     <EditText
         android:textSize="24sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/email_editview"
         android:hint="@string/email"
-        android:layout_below="@+id/name_editview"/>
+        android:inputType="textEmailAddress"
+        android:layout_below="@+id/name_editview"
+        android:autofillHints="@string/email" />
     <Button
         android:id="@+id/update_picker_button"
         android:layout_width="wrap_content"

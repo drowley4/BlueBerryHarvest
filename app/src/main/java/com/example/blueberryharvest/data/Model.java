@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,14 +28,14 @@ public class Model {
     private BucketAccess bucketAccess;
     private PickerAccess pickerAccess;
     private RecordAccess recordAccess;
+    private String cherrySetting;
 
     private Model(Context c) throws SQLException {
         pickers = new ArrayList<Picker>();
         bucketAccess = new BucketAccess(c);
         pickerAccess = new PickerAccess(c);
         recordAccess = new RecordAccess(c);
-
-
+        cherrySetting = "blueberry";
 
         String date = "";
 
@@ -63,6 +62,19 @@ public class Model {
         return instance;
     }
 
+    public void changeCherrySetting() {
+        if(cherrySetting.equals("cherry")) {
+            cherrySetting = "blueberry";
+        }
+        else {
+            cherrySetting = "cherry";
+        }
+    }
+
+    public String getCherrySetting() {
+        return cherrySetting;
+    }
+
     public Picker findPicker(int id) {
         ArrayList<Picker> allPickers = pickerAccess.getAllPickers();
         for(int i = 0; i < allPickers.size(); i++) {
@@ -78,13 +90,13 @@ public class Model {
         Log.d("Model Activity", "getPickers() called " + date);
         this.pickers = recordAccess.getPickers(date);
         for(Picker p: this.pickers) {
-            p.insertRecord(date, new Record(date, bucketAccess.getBuckets(p.getNumID(), date)));
+            p.insertRecord(date, new Record(date, bucketAccess.getBuckets(p.getNumID(), date, cherrySetting)));
         }
         return sortPickersTotal(this.pickers, date);
     }
 
     public List<Bucket> getBuckets(int id, String date) {
-        return bucketAccess.getBuckets(id, date);
+        return bucketAccess.getBuckets(id, date, cherrySetting);
 
     }
 
@@ -95,10 +107,7 @@ public class Model {
             LocalTime now = LocalTime.now();
             time = dtf.format(now);
         }
-     //   Picker picker = this.findPicker(id);
-     //   Bucket bucket = new Bucket(weight, time, date, id);
-    //    picker.addBucket(bucket, date);
-        boolean tmp = bucketAccess.addBucket(id, date, time, weight);
+        boolean tmp = bucketAccess.addBucket(id, date, time, weight, cherrySetting);
         Picker p = findPicker(id);
         if (p.getRecord(date) == null) {
             recordAccess.addDay(id, date);
@@ -107,15 +116,8 @@ public class Model {
     }
 
     public void addPicker(String name) {
-        String date = "";
-        if(Build.VERSION.SDK_INT > 25) {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-            LocalDate now = LocalDate.now();
-            date = dtf.format(now);
-        }
         int nextID = pickerAccess.getNextID();
         pickerAccess.addPicker(name, nextID);
-        recordAccess.addDay(nextID, date);
     }
 
     public void updateBackupEmail(String email) {
@@ -189,21 +191,21 @@ public class Model {
 
     public String exportDatabase(String date) {
         List<Picker> pickers = sortPickersID(getPickers(date));
-        String folder_name = "blueberrytotals";
+        String folder_name = "fruittotals";
         File f = new File(Environment.getExternalStorageDirectory(), folder_name);
         if (!f.exists()) {
             f.mkdirs();
         }
         String nDate = date.substring(0,2) + "_" + date.substring(3,5) + "_" + date.substring(6,10);
-        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/blueberrytotals/" + nDate + ".csv");
+        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/fruittotals/" + cherrySetting + nDate + ".csv");
         CSVWriter writer = null;
         try {
             writer = new CSVWriter(new FileWriter(csv));
 
             List<String[]> data = new ArrayList<String[]>();
-            String[] arr = {"name", "total"};
+            String[] arr = {"name", "total", date};
             data.add(arr);
-            int tmpNum = 0;
+            int tmpNum = 1;
             String[] arr2 = new String[2];
             arr2[1] = "0";
             for(Picker p: pickers) {
@@ -244,20 +246,20 @@ public class Model {
                 break;
             }
         }
-        String folder_name = "blueberryindividuals";
+        String folder_name = "individuals";
         File f = new File(Environment.getExternalStorageDirectory(), folder_name);
         if (!f.exists()) {
             f.mkdirs();
         }
         String nDate = date.substring(0,2) + "_" + date.substring(3,5) + "_" + date.substring(6,10);
-        String title = "id=" + p.getNumID() + "_" + nDate;
-        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/blueberryindividuals/" + title + ".csv");
+        String title = "name=" + p.getName() + "id=" + p.getNumID() + cherrySetting + "_" + nDate;
+        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/individuals/" + title + ".csv");
         CSVWriter writer = null;
         try {
             writer = new CSVWriter(new FileWriter(csv));
 
             List<String[]> data = new ArrayList<String[]>();
-            String[] arr = {"name"};
+            String[] arr = {"name", date};
             String[] arr2;
             data.add(arr);
             List<Bucket> buckets = p.getRecord(date).getBuckets();
@@ -298,18 +300,18 @@ public class Model {
             LocalTime now = LocalTime.now();
             time = dtf.format(now);
         }
-        String folder_name = "blueberrybackups";
+        String folder_name = "fruitbackups";
         File f = new File(Environment.getExternalStorageDirectory(), folder_name);
         if (!f.exists()) {
             f.mkdirs();
         }
-        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/blueberrybackups/T" + time + ".csv");
+        String csv = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/fruitbackups/" + cherrySetting + time + ".csv");
         CSVWriter writer = null;
         try {
             writer = new CSVWriter(new FileWriter(csv));
 
             List<String[]> data = new ArrayList<String[]>();
-            String[] arr = {"name"};
+            String[] arr = {"name", date};
             String[] arr2;
             data.add(arr);
             for(Picker p: pickers) {
@@ -317,16 +319,19 @@ public class Model {
                     continue;
                 }
                 List<Bucket> buckets = p.getRecord(date).getBuckets();
-                arr = new String[buckets.size()+1];
+                arr = new String[buckets.size()+2];
                 arr2 = new String[buckets.size()+1];
                 int index = 1;
                 arr[0] = p.getName();
                 arr2[0] = "time";
+                double total = 0;
                 for(Bucket b: buckets) {
                     arr[index] = Double.toString(b.getWeight());
+                    total += b.getWeight();
                     arr2[index] = b.getTime().substring(0, 5);
                     index++;
                 }
+                arr[index] = Double.toString(total);
                 data.add(arr);
                 data.add(arr2);
             }
@@ -338,5 +343,30 @@ public class Model {
             e.printStackTrace();
         }
         return csv;
+    }
+
+    public void cleanFolders() {
+        File backups = new File(Environment.getExternalStorageDirectory(), "fruitbackups");
+        File totals = new File(Environment.getExternalStorageDirectory(), "fruittotals");
+        File individuals = new File(Environment.getExternalStorageDirectory(), "individuals");
+        if (backups.isDirectory()) {
+            File[] listFiles = backups.listFiles();
+            for(File file : listFiles){
+                file.delete();
+            }
+        }
+        if(totals.isDirectory()) {
+            File[] listFiles = totals.listFiles();
+            for(File file : listFiles){
+                file.delete();
+            }
+        }
+        if (individuals.isDirectory()) {
+            File[] listFiles = individuals.listFiles();
+            for(File file : listFiles){
+                file.delete();
+            }
+        }
+
     }
 }

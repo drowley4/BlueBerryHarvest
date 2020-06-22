@@ -28,6 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String BUCKET_COL_2 = "DATE";
     private static final String BUCKET_COL_3 = "TIME";
     private static final String BUCKET_COL_4 = "WEIGHT";
+    private static final String BUCKET_COL_5 = "VARIETY";
 
     // records table's column names
     private static final String RECORD_COL_1 = "ID";
@@ -36,7 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // create table statements
     private static final String CREATE_PICKERS_TABLE = "create table " + TABLE_PICKERS + " (ID INTEGER PRIMARY KEY, NAME TEXT, EMAIL TEXT)";
-    private static final String CREATE_BUCKETS_TABLE = "create table " + TABLE_BUCKETS + " (ID INTEGER, DATE TEXT, TIME TEXT, WEIGHT FLOAT, CONSTRAINT PK_Bucket PRIMARY KEY (ID,TIME))";
+    private static final String CREATE_BUCKETS_TABLE = "create table " + TABLE_BUCKETS + " (ID INTEGER, DATE TEXT, TIME TEXT, WEIGHT FLOAT, VARIETY TEXT, CONSTRAINT PK_Bucket PRIMARY KEY (ID,TIME))";
     private static final String CREATE_RECORDS_TABLE = "create table " + TABLE_RECORDS + " (ID INTEGER, DATE TEXT, TOTAL FLOAT, CONSTRAINT PK_Record PRIMARY KEY (ID, DATE))";
 
     // drop table statements
@@ -53,7 +54,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     private DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 2);
+        super(context, DATABASE_NAME, null, 3);
     }
 
     @Override
@@ -65,7 +66,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("ALTER TABLE " + TABLE_PICKERS + " ADD COLUMN EMAIL TEXT");
+
+        db.execSQL("ALTER TABLE " + TABLE_BUCKETS + " ADD COLUMN VARIETY TEXT");
      /*   db.execSQL(DROP_PICKERS_TABLE);
         db.execSQL(DROP_BUCKETS_TABLE);
         db.execSQL(DROP_RECORDS_TABLE);
@@ -83,13 +85,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean insertBucket(int id, String date, String time, float weight) {
+    public boolean insertBucket(int id, String date, String time, float weight, String variety) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(BUCKET_COL_1, id);
         values.put(BUCKET_COL_2, date);
         values.put(BUCKET_COL_3, time);
         values.put(BUCKET_COL_4, weight);
+        values.put(BUCKET_COL_5, variety);
         if (db.insert(TABLE_BUCKETS, null, values) == -1) {
             return false;
         }
@@ -156,7 +159,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getBuckets(int id, String date) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("SELECT Buckets.TIME,Buckets.WEIGHT FROM " + TABLE_BUCKETS + " WHERE Buckets.DATE=? AND Buckets.ID=?", new String[]{date, Integer.toString(id)});
+        Cursor res = db.rawQuery("SELECT Buckets.TIME,Buckets.WEIGHT,Buckets.VARIETY FROM " + TABLE_BUCKETS + " WHERE Buckets.DATE=? AND Buckets.ID=?", new String[]{date, Integer.toString(id)});
         return res;
     }
 

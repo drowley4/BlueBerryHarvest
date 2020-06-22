@@ -21,4 +21,8 @@ public abstract class Presenter {
     public double getTotalDayPounds(String date) {
         return this.model.getTotalDayPounds(date);
     }
+
+    public String getCherrySetting() {
+        return model.getCherrySetting();
+    }
 }

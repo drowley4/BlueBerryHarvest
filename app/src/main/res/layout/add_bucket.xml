@@ -1,37 +1,39 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
+
+    <NumberPicker
+        android:layout_width="wrap_content"
+        android:layout_height="125dp"
+        android:id="@+id/weight_picker" />
+    <AutoCompleteTextView
+        android:textSize="20sp"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:id="@+id/tmp">
-        <NumberPicker
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/weight_picker" />
-        <AutoCompleteTextView
-            android:textSize="16sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/name_editview"
-            android:hint="@string/full_name_id" />
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:id="@+id/name_editview"
+        android:hint="@string/full_name_id"
+        android:layout_toEndOf="@+id/weight_picker"/>
 
     <Button
         android:id="@+id/add_bucket_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="16sp"
         android:text="@string/add_bucket"
-        android:layout_toStartOf="@id/cancel_bucket_button"
-        android:layout_alignBottom="@+id/tmp" />
+        android:layout_toEndOf="@+id/weight_picker"
+        android:layout_below="@+id/name_editview"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="5dp"/>
 
     <Button
         android:id="@+id/cancel_bucket_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="16sp"
         android:text="@string/cancel"
-        android:layout_alignBottom="@+id/tmp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="10dp"/>
+        android:layout_below="@+id/name_editview"
+        android:layout_toEndOf="@+id/add_bucket_button"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="5dp"/>
 
 </RelativeLayout>

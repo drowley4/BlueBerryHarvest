@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.example.blueberryharvest.R;
 import com.example.blueberryharvest.data.Picker;
 
-import org.w3c.dom.Text;
 
 import java.util.List;
 

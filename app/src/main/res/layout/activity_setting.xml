@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/everything"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorBerry"
     tools:context=".activity.SettingActivity">
@@ -31,13 +32,35 @@
         android:textStyle="bold"
         android:layout_below="@id/date_textview"/>
     <LinearLayout
-        android:id="@+id/backup_linear"
+        android:id="@+id/cherry_setting_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:orientation="horizontal"
         android:background="@color/colorLightBerry"
         android:layout_below="@id/total_textview">
+        <TextView
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/cherry_setting_textview"/>
+        <Button
+            android:id="@+id/change_cherry_setting_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:text="Change Fruit"
+            android:textSize="17sp"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/backup_linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:background="@color/colorLightBerry"
+        android:layout_below="@id/cherry_setting_linear">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -56,6 +79,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
             android:minWidth="10dp"
             android:id="@+id/backup_button"
             android:text="@string/backup"
@@ -88,6 +112,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
             android:id="@+id/export_button"
             android:text="@string/export"
             android:textSize="17sp"/>
@@ -111,14 +136,8 @@
             android:id="@+id/delete_picker_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
             android:text="@string/delete_picker"
             android:textSize="17sp"/>
-
-
     </LinearLayout>
-
-
-
-
-
 </RelativeLayout>

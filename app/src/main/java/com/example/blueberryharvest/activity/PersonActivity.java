@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +22,7 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +44,7 @@ public class PersonActivity extends AppCompatActivity {
     private Dialog myDialog;
     private List<Bucket> buckets;
     private int pickerID;
+    private String pickerName;
     private String harvestDate;
     private BucketAdapter bucketAdapter;
     private TextView dateTextView;
@@ -65,6 +68,7 @@ public class PersonActivity extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        updateBackgroud();
         this.myDialog = new Dialog(this);
         TextView idView = (TextView) findViewById(R.id.id_textview);
         this.nameView = (TextView) findViewById(R.id.name_textview);
@@ -79,7 +83,7 @@ public class PersonActivity extends AppCompatActivity {
         Intent intentExtras = getIntent();
         this.pickerID = intentExtras.getIntExtra("id", 0);
         this.harvestDate = intentExtras.getStringExtra("date");
-        String pickerName = intentExtras.getStringExtra("name");
+        this.pickerName = intentExtras.getStringExtra("name");
 
         this.buckets = this.presenter.getBuckets(this.pickerID, this.harvestDate);
         this.bucketAdapter = new BucketAdapter(getApplicationContext(), this.buckets);
@@ -259,7 +263,7 @@ public class PersonActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Picker Updated", Toast.LENGTH_SHORT).show();
                     if(!tmp.equals("")) {
                         String name = "Name: " + tmp;
-                        nameView.setText(tmp);
+                        nameView.setText(name);
                     }
                     if(!email.equals("")) {
                         emailTextView.setText(email);
@@ -292,11 +296,30 @@ public class PersonActivity extends AppCompatActivity {
         i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         i.putExtra(Intent.EXTRA_EMAIL, new String[] { presenter.getEmail(pickerID) });
-        i.putExtra(Intent.EXTRA_SUBJECT,"Blueberry total for " + date);
+        i.putExtra(Intent.EXTRA_SUBJECT,pickerName + " " + presenter.getCherrySetting() + " total for " + date);
         Uri uri = FileProvider.getUriForFile(getApplicationContext(), "com.example.blueberryharvest.myprovider", file);
         i.putExtra(Intent.EXTRA_STREAM, uri);
         i.setType("message/rfc822");
 
         startActivity(Intent.createChooser(i, "Send Records..."));
+    }
+
+    private void updateBackgroud() {
+        String type = presenter.getCherrySetting();
+        RelativeLayout tmp = findViewById(R.id.everything);
+        Toolbar toolbar = findViewById(R.id.my_toolbar);
+        ListView bucketList = findViewById(R.id.bucket_list);
+        if(type.equals("cherry")) {
+            setTitle("Cherry Harvest");
+            tmp.setBackgroundColor(ContextCompat.getColor(this, R.color.colorCherry));
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorCherry));
+            bucketList.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightCherry));
+        }
+        else if(type.equals("blueberry")) {
+            setTitle("Blueberry Harvest");
+            tmp.setBackgroundColor(ContextCompat.getColor(this, R.color.colorBerry));
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorBerry));
+            bucketList.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightBerry));
+        }
     }
 }

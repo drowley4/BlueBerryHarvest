@@ -1,15 +1,20 @@
 package com.example.blueberryharvest.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -17,6 +22,7 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +44,7 @@ public class SettingActivity extends AppCompatActivity {
     private TextView exportTextView;
     private TextView dateTextView;
     private TextView totalTextView;
+    private TextView cherrySettingTextview;
     private String date;
 
     @Override
@@ -57,17 +64,17 @@ public class SettingActivity extends AppCompatActivity {
             ab.setDisplayHomeAsUpEnabled(true);
         }
         this.myDialog = new Dialog(this);
-
         backupTextView = (TextView) findViewById(R.id.backup_textview);
         exportTextView = (TextView) findViewById(R.id.export_textview);
         dateTextView = (TextView) findViewById(R.id.date_textview);
         totalTextView = (TextView) findViewById(R.id.total_textview);
+        cherrySettingTextview = findViewById(R.id.cherry_setting_textview);
         LinearLayout backupLayout = (LinearLayout) findViewById(R.id.backup_linear);
         LinearLayout exportLayout = (LinearLayout) findViewById(R.id.export_linear);
         Button backupButton = (Button) findViewById(R.id.backup_button);
         Button exportButton = (Button) findViewById(R.id.export_button);
+        Button changeCherrySettingButton = (Button) findViewById(R.id.change_cherry_setting_button);
         final Button deletePickerButton = (Button) findViewById(R.id.delete_picker_button);
-
         this.date = "";
 
         if(Build.VERSION.SDK_INT > 25) {
@@ -75,9 +82,9 @@ public class SettingActivity extends AppCompatActivity {
             LocalDate now = LocalDate.now();
             this.date = dtf.format(now);
         }
-        String tmp = "Total Pounds Today: " + presenter.getTotalDayPounds(date);
-        totalTextView.setText(tmp);
-
+        String tmp = "Fruit Type: " + presenter.getCherrySetting();
+        cherrySettingTextview.setText(tmp);
+        updateBackgroud();
         dateTextView.setText(this.date);
         String email = presenter.getBackupEmail();
         if(email == null) {
@@ -111,6 +118,17 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
+        changeCherrySettingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("activity", presenter.getCherrySetting());
+                presenter.switchCherrySetting();
+                String tmp = "Fruit Type: " + presenter.getCherrySetting();
+                cherrySettingTextview.setText(tmp);
+                updateBackgroud();
+            }
+        });
+
         deletePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,14 +139,24 @@ public class SettingActivity extends AppCompatActivity {
         exportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                export();
+                if(presenter.getExportEmail() == null) {
+                    Toast.makeText(getApplicationContext(), "No Email given to send to", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    export();
+                }
             }
         });
 
         backupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                backup();
+                if(presenter.getBackupEmail() == null) {
+                    Toast.makeText(getApplicationContext(), "No Email given to send to", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    backup();
+                }
             }
         });
 
@@ -266,7 +294,7 @@ public class SettingActivity extends AppCompatActivity {
         i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         i.putExtra(Intent.EXTRA_EMAIL, new String[] { presenter.getExportEmail() });
-        i.putExtra(Intent.EXTRA_SUBJECT,"Blueberry totals for " + date);
+        i.putExtra(Intent.EXTRA_SUBJECT,presenter.getCherrySetting() + " totals for " + date);
         Uri uri = FileProvider.getUriForFile(getApplicationContext(), "com.example.blueberryharvest.myprovider", file);
         i.putExtra(Intent.EXTRA_STREAM, uri);
         i.setType("message/rfc822");
@@ -277,19 +305,48 @@ public class SettingActivity extends AppCompatActivity {
     private void backup() {
         verifyStoragePermissions(SettingActivity.this);
         String csv = presenter.backup(date);
-        /*File file = new File(csv);
+        File file = new File(csv);
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        i.putExtra(Intent.EXTRA_EMAIL, new String[] { presenter.getExportEmail() });
-        i.putExtra(Intent.EXTRA_SUBJECT,"sub");
-        i.putExtra(Intent.EXTRA_TEXT, "body");
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{presenter.getBackupEmail()});
+        i.putExtra(Intent.EXTRA_SUBJECT, presenter.getCherrySetting() + " backups for " + date);
         Uri uri = FileProvider.getUriForFile(getApplicationContext(), "com.example.blueberryharvest.myprovider", file);
         i.putExtra(Intent.EXTRA_STREAM, uri);
         i.setType("message/rfc822");
 
-        startActivity(Intent.createChooser(i, "Send feedback..."));*/
+        startActivity(Intent.createChooser(i, "Send Records..."));
     }
 
+    private void updateBackgroud() {
+        presenter.cleanFolders();
+        String line = "Total Pounds Today: " + presenter.getTotalDayPounds(date);
+        totalTextView.setText(line);
+        String type = presenter.getCherrySetting();
+        RelativeLayout tmp = findViewById(R.id.everything);
+        Toolbar toolbar = findViewById(R.id.my_toolbar);
+        LinearLayout backupLinear = findViewById(R.id.backup_linear);
+        LinearLayout exportLinear = findViewById(R.id.export_linear);
+        LinearLayout deleteLinear = findViewById(R.id.delete_picker_linear);
+        LinearLayout cherryLinear = findViewById(R.id.cherry_setting_linear);
+        if(type.equals("cherry")) {
+            setTitle("Cherry Harvest");
+            tmp.setBackgroundColor(ContextCompat.getColor(this, R.color.colorCherry));
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorCherry));
+            backupLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightCherry));
+            exportLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightCherry));
+            deleteLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightCherry));
+            cherryLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightCherry));
+        }
+        else if(type.equals("blueberry")) {
+            setTitle("Blueberry Harvest");
+            tmp.setBackgroundColor(ContextCompat.getColor(this, R.color.colorBerry));
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorBerry));
+            backupLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightBerry));
+            exportLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightBerry));
+            deleteLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightBerry));
+            cherryLinear.setBackgroundColor(ContextCompat.getColor(this, R.color.colorLightBerry));
+        }
+    }
 
 }

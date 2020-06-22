@@ -2,6 +2,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorBerry"
+    android:id="@+id/everything"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
